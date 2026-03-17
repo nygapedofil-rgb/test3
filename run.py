@@ -12,15 +12,15 @@ def send(username,password,file_data:dict):
 
 
 
-    response = requests.post(url1, json={"username": str(username), "password": str(password), 'file_data': file_data})
+    response = requests.post(url1, json={"username": str(username), "password": str(password), 'file_data': file_data},timeout=5)
     print(response.status_code)
     print(response.text)
     return response.status_code
 
 def start_serwer():
     try:
-        proces = subprocess.Popen(['daphne','-b ','0.0.0.0','-p',' 8000','mywebsite.asgi:application'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True,text=True)
-
+        proces = subprocess.Popen(['daphne','-b','0.0.0.0','-p',' 8000','mywebsite.asgi:application'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+        time.sleep(5)
         if proces.poll() is not None:
             print("Serwer się wywalił")
             print(proces.stderr.read())
@@ -65,9 +65,9 @@ def main():
     username = args.username
     password = args.password
     while True:
-        value = send(str(username),str(password),{'url':value})
-        if value != 200:
-            print(value)
+        data = send(str(username),str(password),{'url':value})
+        if data != 200:
+            print(data)
             continue
         else:
             print('done')
