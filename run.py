@@ -11,6 +11,7 @@ def send(username,password,file_data:dict):
     url1 = "http://192.168.50.143:8000/api/update_file"
 
 
+
     response = requests.post(url1, json={"username": str(username), "password": str(password), 'file_data': file_data})
     print(response.status_code)
     print(response.text)
