@@ -19,8 +19,13 @@ def send(username,password,file_data:dict):
 
 def start_serwer():
     try:
-        proces = subprocess.Popen(['daphne','-b 0.0.0.0','-p 8000','mywebsite.asgi:application'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True)
-        print('done')
+        proces = subprocess.Popen(['daphne','-b ','0.0.0.0','-p',' 8000','mywebsite.asgi:application'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True,text=True)
+
+        if proces.poll() is not None:
+            print("Serwer się wywalił")
+            print(proces.stderr.read())
+        else:
+            print('done')
     except Exception as e:
         print(e)
         print('exception')
