@@ -18,7 +18,7 @@ def send(username,password,file_data:dict):
 
 def start_serwer():
     try:
-        proces = subprocess.Popen(['daphne','-b 0.0.0.0','mywebsite.asgi:application'],shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True)
+        proces = subprocess.Popen(['daphne','-b 0.0.0.0','-p 8000','mywebsite.asgi:application'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True)
         print('done')
     except Exception as e:
         print(e)
@@ -46,6 +46,7 @@ def main():
     parser.add_argument('-p', '--password', help='password')
     thread = threading.Thread(target=start_serwer)
     thread.start()
+    time.sleep(10)
     while True:
         value = start_tunel()
         if value:
