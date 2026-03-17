@@ -19,19 +19,26 @@ def send(username,password,file_data:dict):
 def start_serwer():
     try:
         proces = subprocess.Popen(['daphne','-b 0.0.0.0','mywebsite.asgi:application'],shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True)
-        print(proces.stdout.read())
         print('done')
     except Exception as e:
         print(e)
         print('exception')
 
 def start_tunel():
-    try:
-        proces = subprocess.Popen(['lt','--port 8000'],shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE,universal_newlines=True)
-        print(proces.stdout.read())
-        return proces.stdout.read()
-    except Exception as e:
-        return None
+    proces = subprocess.Popen(
+        ['lt', '--port', '8000'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True
+    )
+
+    for line in proces.stdout:
+        print(line.strip())
+
+        if "https://" in line:
+            return line.strip().split()[-1]
+
+    return None
 
 def main():
     parser = argparse.ArgumentParser(description='Simple CLI')
@@ -39,7 +46,6 @@ def main():
     parser.add_argument('-p', '--password', help='password')
     thread = threading.Thread(target=start_serwer)
     thread.start()
-    thread.join()
     while True:
         value = start_tunel()
         if value:
