@@ -60,7 +60,7 @@ def main():
     parser.add_argument('-p', '--password', help='password')
     args = parser.parse_args()
 
-    thread = threading.Thread(target=start_serwer)
+    thread = threading.Thread(target=start_serwer,daemon=True)
     thread.start()
     time.sleep(10)
 
