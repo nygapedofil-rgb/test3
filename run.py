@@ -86,7 +86,6 @@ def main():
             break
 
     while True:
-        print('waiting')
         time.sleep(5)
 
 if __name__ == '__main__':
