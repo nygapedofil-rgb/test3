@@ -23,10 +23,6 @@ def send(username, password, file_data: dict, base_url):
         return None
 
 def run_process(name, command, stop_event=None, capture_url=False):
-    """
-    Uruchamia proces i printuje jego stdout w czasie rzeczywistym.
-    Jeśli capture_url=True, zwraca pierwszy URL znaleziony w linii zawierającej 'https://'.
-    """
     url_found = None
     try:
         proces = subprocess.Popen(
@@ -40,7 +36,6 @@ def run_process(name, command, stop_event=None, capture_url=False):
             if line:
                 line = line.strip()
                 print(f"[{name}]", line)
-
                 if capture_url and "https://" in line and url_found is None:
                     url_found = line.split()[-1]
 
@@ -50,7 +45,6 @@ def run_process(name, command, stop_event=None, capture_url=False):
 
         proces.stdout.close()
         proces.wait()
-
     except Exception as e:
         print(f"[{name}] Exception:", e)
 
@@ -85,9 +79,7 @@ def main():
     # Start serwera w wątku
     server_thread = threading.Thread(target=start_serwer, args=(stop_event,), daemon=True)
     server_thread.start()
-
-    # Daj serwerowi czas na uruchomienie
-    time.sleep(5)
+    time.sleep(5)  # daj serwerowi czas na start
 
     # Start tunelu i pobranie URL
     tunnel_url = None
@@ -99,17 +91,20 @@ def main():
 
     print("[MAIN] Tunel URL:", tunnel_url)
 
-    # Wysyłanie danych na serwer
+    # Serwer docelowy, do którego wysyłamy URL tunelu
+    base_url = "http://192.168.50.143:8000"
+
+    # Wysyłka URL tunelu do serwera
     while True:
-        status = send(username, password, {'url': tunnel_url}, base_url='http://192.168.50.143:8000')
+        print("[MAIN] Wysyłanie URL tunelu do serwera docelowego")
+        status = send(username, password, {'url': tunnel_url}, base_url=base_url)
         if status == 200:
-            print("[MAIN] Plik wysłany pomyślnie")
+            print("[MAIN] URL tunelu wysłany pomyślnie")
             break
         else:
             print(f"[MAIN] Błąd wysyłki: {status}, retry za 5s...")
             time.sleep(5)
 
-    # Utrzymanie procesu przy życiu
     try:
         while True:
             time.sleep(5)
