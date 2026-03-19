@@ -101,7 +101,7 @@ def main():
 
     # Wysyłanie danych na serwer
     while True:
-        status = send(username, password, {'url': tunnel_url}, base_url=tunnel_url)
+        status = send(username, password, {'url': tunnel_url}, base_url='http://192.168.50.143:8000')
         if status == 200:
             print("[MAIN] Plik wysłany pomyślnie")
             break
