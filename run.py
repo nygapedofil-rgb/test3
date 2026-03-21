@@ -4,13 +4,14 @@ import subprocess
 import json
 import argparse
 import threading
-
+proces = ""
 
 class Zyd():
-    def __init__(self,username,password):
+    def __init__(self,username,password,proces):
         self.init_time = time.time()
         self.username = username
         self.password = password
+        self.proces =proces
 
     def send(self,username, password, file_data: dict):
         url1 = "http://192.168.50.143:8000/api/update_file"
@@ -22,10 +23,14 @@ class Zyd():
         except requests.RequestException as e:
             print("Request error:", e)
 
+    def setup(self,proces):
+        self.proces = proces
+
 
     def __del__(self):
         self.send(self.username, self.password, {'url':''})
-
+        self.proces.kill()
+        self.proces.terminate()
         now = time.time()
         print('running time:', now - self.init_time)
 
@@ -41,6 +46,7 @@ def send(username,password,file_data:dict):
         return None
 
 def start_serwer():
+    global proces
     try:
         proces = subprocess.Popen(
             ['daphne','-b','0.0.0.0','-p','8000','mywebsite.asgi:application'],
@@ -82,18 +88,19 @@ def start_tunnel():
     return None
 
 def main():
+    global proces
     parser = argparse.ArgumentParser(description='Simple CLI')
     parser.add_argument('-u', '--username', help='username')
     parser.add_argument('-p', '--password', help='password')
     args = parser.parse_args()
     username = args.username
     password = args.password
-    runer = Zyd(username,password)
+    runer = Zyd(username,password,'')
 
     thread = threading.Thread(target=start_serwer,daemon=True)
     thread.start()
     time.sleep(10)
-
+    runer.setup(proces)
     while True:
         value = start_tunnel()
         if value:
