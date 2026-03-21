@@ -1,19 +1,24 @@
 import subprocess
+import time
+import requests
 
 
-def start_tunel():
-    proces = subprocess.Popen(
+def start_tunnel():
+    subprocess.Popen(
         ['ngrok', 'http', '8000'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT
     )
 
-    for line in proces.stdout:
-        print(line.strip())
-        if "https://" in line:
-            return line.strip().split()[-1]
+    time.sleep(2)  # daj ngrokowi czas na start
+
+    response = requests.get("http://127.0.0.1:4040/api/tunnels")
+    data = response.json()
+
+    for tunnel in data['tunnels']:
+        if tunnel['public_url'].startswith("https"):
+            return tunnel['public_url']
 
 
-value = start_tunel()
-print(value)
+url = start_tunnel()
+print(url)
