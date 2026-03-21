@@ -5,6 +5,30 @@ import json
 import argparse
 import threading
 
+
+class Zyd():
+    def __init__(self,username,password):
+        self.init_time = time.time()
+        self.username = username
+        self.password = password
+
+    def send(self,username, password, file_data: dict):
+        url1 = "http://192.168.50.143:8000/api/update_file"
+        try:
+            response = requests.post(url1, json={"username": str(username), "password": str(password),
+                                                 'file_data': file_data}, timeout=5)
+            print(response.status_code)
+            print(response.text)
+        except requests.RequestException as e:
+            print("Request error:", e)
+
+
+    def __del__(self):
+        self.send(self.username, self.password, {'url':''})
+
+        now = time.time()
+        print('running time:', now - self.init_time)
+
 def send(username,password,file_data:dict):
     url1 = "http://192.168.50.143:8000/api/update_file"
     try:
@@ -39,18 +63,21 @@ def start_serwer():
     except Exception as e:
         print("Exception in start_serwer:", e)
 
-def start_tunel():
-    proces = subprocess.Popen(
-        ['lt', '--port', '8000'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True
+def start_tunnel():
+    subprocess.Popen(
+        ['ngrok', 'http', '8000'],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT
     )
 
-    for line in proces.stdout:
-        print(line.strip())
-        if "https://" in line:
-            return line.strip().split()[-1]
+    time.sleep(2)  # daj ngrokowi czas na start
+
+    response = requests.get("http://127.0.0.1:4040/api/tunnels")
+    data = response.json()
+
+    for tunnel in data['tunnels']:
+        if tunnel['public_url'].startswith("https"):
+            return tunnel['public_url']
 
     return None
 
@@ -59,13 +86,16 @@ def main():
     parser.add_argument('-u', '--username', help='username')
     parser.add_argument('-p', '--password', help='password')
     args = parser.parse_args()
+    username = args.username
+    password = args.password
+    runer = Zyd(username,password)
 
     thread = threading.Thread(target=start_serwer,daemon=True)
     thread.start()
     time.sleep(10)
 
     while True:
-        value = start_tunel()
+        value = start_tunnel()
         if value:
             print(value)
             break
@@ -73,8 +103,7 @@ def main():
             time.sleep(5)
             continue
 
-    username = args.username
-    password = args.password
+
 
     while True:
         data = send(str(username),str(password),{'url':value})
